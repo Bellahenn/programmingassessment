@@ -28,6 +28,7 @@ team_count <- d_name_players %>%
   arrange(desc(n))
 
 team_count
+#https://stackoverflow.com/questions/36904010/rscript-knitr-substr-function-not-working-correctly-inside-knitr-code-chunk
 ```
 #The teams who have drafted the most players who have a first name that starts with D and were drafted in an even year are the Boston Celtics, the Milwaukee Bucks, and the Seattle Supersonics. Each team drafted 7 players.
 
@@ -86,5 +87,6 @@ underperforming_teams <- filter(team_performance, performance_diff < 0) %>%
 
 overperforming_teams
 underperforming_teams
+#https://sparkbyexamples.com/r-programming/how-to-do-left-join-in-r/
 ```
 #Unfortunately, I could not figure out how to find over/underperforming teams based on their overall picks and the value of each draft slot found above. 
