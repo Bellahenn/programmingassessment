@@ -1,0 +1,90 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r}
+draft <- read.csv("nbaplayersdraft.csv")
+```
+
+```{r}
+duke_players <- draft %>%
+  filter(draft$college == "Duke" , draft$year <= "2000")
+  
+team_count <- duke_players %>%
+  count(duke_players$team) %>%
+  arrange(desc(n))
+
+team_count
+```
+#The NBA teams who have drafted the most players from Duke in or before the 2000 draft are the Dallas Mavericks, Minnesota Timberwolves, and the Phoenix Suns. Each team drafted 2 players.
+
+```{r}
+d_name_players <- draft %>%
+  filter(substr(draft$player, 1, 1) == "D", draft$year %% 2 == 0)
+
+team_count <- d_name_players %>%
+  count(d_name_players$team) %>%
+  arrange(desc(n))
+
+team_count
+```
+#The teams who have drafted the most players who have a first name that starts with D and were drafted in an even year are the Boston Celtics, the Milwaukee Bucks, and the Seattle Supersonics. Each team drafted 7 players.
+
+```{r}
+first_round_picks <- draft %>%
+  filter(draft$team == "ATL") %>%
+  filter(overall_pick <= 30)
+
+ggplot(merged_data, aes(x = first_round_picks$year, y = first_round_picks$overall_pick)) +
+  geom_point() +
+  labs(x = "Year", y = "First Round Pick",
+       title = "Relationship between Year and Overall Pick in the First Round for the Atlanta Hawks")
+```
+
+#This graph shows the First round picks for each year. You can see that in 2001 the Hawks had a high pick, meaning that in the 2000-2001 season, their record was not great. However, in the following draft they did not have a first round pick. This might indicate that their first round pick in 2001 made a good impact on the 2001-2002 season causing their record to be better and resulting in a lower pick. 
+
+```{r}
+position_stats <- draft %>%
+  group_by(overall_pick) %>%
+  summarize(
+    average_minutes_played = sum(average_minutes_played),
+    total_points = sum(points),
+    total_assists = sum(assists),
+    total_rebounds = sum(total_rebounds)
+  ) %>%
+  mutate(
+    z_minutes_played = scale(average_minutes_played),
+    z_total_points = scale(total_points),
+    z_total_assists = scale(total_assists),
+    z_total_rebounds = scale(total_rebounds)
+  ) %>%
+  na.omit() %>%
+  mutate(
+    overall_score = rowMeans(select(., starts_with("z_")), na.rm = TRUE)
+  ) %>%
+  arrange(desc(overall_score)) %>%
+  mutate(rank = row_number()) %>%
+  select(overall_pick, rank, overall_score)
+
+position_stats
+```
+```{r}
+position_stats <- draft %>%
+  group_by(team)
+
+team_performance <- position_stats %>%
+  mutate(performance_diff = overall_pick - rank)
+
+overperforming_teams <- filter(team_performance, performance_diff > 0) %>%
+  arrange(desc(performance_diff)) %>%
+  select(team, performance_diff)
+
+underperforming_teams <- filter(team_performance, performance_diff < 0) %>%
+  arrange(performance_diff) %>%
+  select(team, performance_diff)
+
+overperforming_teams
+underperforming_teams
+```
+#Unfortunately, I could not figure out how to find over/underperforming teams based on their overall picks and the value of each draft slot found above. 
